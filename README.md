@@ -72,3 +72,50 @@ def get_acc(x_pred, x_true) # compute accuracy score
 def get_auc(x_pred, x_true) # compute auc score
 </code>
 </pre>
+
+### mucri.py ###
+The file contains the main codes for the MuCri models, integrated in class *MuCriPreference*.
+It support five MuCri models: *L-MuCri*, *C-MuCri*, *H-MuCri-Prod*, *H-MuCri-Mean* and *H-MuCri-Max*.
+You can initialize the instances of these models like this:
+<pre>
+<code>
+model = MuCriPreference(model='latent')       # L-MuCri
+model = MuCriPreference(model='content')      # C-MuCri
+model = MuCriPreference(model='hybrid')       # H-MuCri-Prod
+model = MuCriPreference(model='hybrid mean')  # H-MuCri-Mean
+model = MuCriPreference(model='hybrid max')   # H-MuCri-Max
+</code>
+</pre>  
+
+After instance initialization, you can train you model and predict on new samples.
+An example to use this model is shown below:
+<pre>
+<code>
+feed = INRIAFeed()
+Xtrain, Xtest = feed.generate_data()
+model = MuCriPreference(model='latent')
+for train, test in zip(Xtrain, Xtest):
+    model.fit(X=train,            # traning samples
+              U=feed.U,           # number of users
+              I=feed.I,           # number of images
+              Fl=5,               # number of top-F latent criteria
+              Dl=6,               # number of latent criteria
+              k=100,              # dimensions of embeddings
+              learning_rate=0.02, # learning rate
+              lamda=.01,          # regularization parameter
+              max_iters=300,      # maximum number of iterations
+              tol=-1              # tolerance for early stopping
+              )
+    X_pred = model.predict(test, None)
+    acc = get_acc(x_pred=X_pred, x_true=test)
+    auc = get_auc(x_pred=X_pred, x_true=test)
+    print 'Accuracy: %.5f' % acc
+    print 'AUC: %.5f' % auc
+</code>
+</pre>
+
+## notice ##  
+To use *C-MuCri* and *H-MuCri-X*, you need to extract the content features of the images.
+Since there are too many dependent libraries in our project, we just ignore them in this repo. 
+Please check out the links to these libraries in our paper.
+After you extract the content features, it is very simple to use them in these codes (see *mucri.py* for more detail).
